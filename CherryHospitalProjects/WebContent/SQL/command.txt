@@ -1,0 +1,85 @@
+SQL> CREATE TABLE signup (
+       id NUMBER PRIMARY KEY,
+       name VARCHAR2(20) NOT NULL,
+       email VARCHAR2(20) NOT NULL UNIQUE,
+       password VARCHAR2(25) NOT NULL,
+       confirm_password VARCHAR2(25) NOT NULL,
+       phone_number VARCHAR2(10) NOT NULL,
+        blood_type VARCHAR2(2) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP );
+
+
+
+SQL> CREATE SEQUENCE signup_seq START WITH 1 INCREMENT BY 1;
+
+Sequence created.
+
+SQL> CREATE OR REPLACE TRIGGER signup_bir
+  2  BEFORE INSERT ON signup
+  3  FOR EACH ROW
+  4  BEGIN
+  5    SELECT signup_seq.NEXTVAL INTO :new.id FROM dual;
+  6  END;
+  7  /
+
+Trigger created.
+
+CREATE SEQUENCE signup_seq START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE DoctorDetails (
+    id int PRIMARY KEY,
+    dname VARCHAR2(100),
+    dspecialist VARCHAR2(100),
+    ddegree VARCHAR2(100),
+    dschedule VARCHAR2(100)
+);
+CREATE SEQUENCE doctor_id_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+CREATE OR REPLACE TRIGGER doctor_id_trigger
+BEFORE INSERT ON DoctorDetails
+FOR EACH ROW
+BEGIN
+  IF :NEW.id IS NULL THEN
+    SELECT doctor_id_seq.NEXTVAL INTO :NEW.id FROM dual;
+  END IF;
+END;
+
+/
+
+CREATE TABLE appointments (
+    id NUMBER PRIMARY KEY,
+    user_id NUMBER NOT NULL,
+    doctor_id NUMBER NOT NULL,
+    appointment_date DATE NOT NULL,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES signup(id),
+    CONSTRAINT fk_doctor FOREIGN KEY (doctor_id) REFERENCES doctordetails(id),
+    CONSTRAINT unique_booking_u_d_d UNIQUE (user_id, doctor_id, appointment_date)
+);
+CREATE SEQUENCE appointments_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+CREATE OR REPLACE TRIGGER appointments_before_insert
+BEFORE INSERT ON appointments
+FOR EACH ROW
+BEGIN
+  IF :NEW.id IS NULL THEN
+    SELECT appointments_seq.NEXTVAL INTO :NEW.id FROM dual;
+  END IF;
+END;
+/
+
+CREATE TABLE doctor_schedule (
+    schedule_id NUMBER  PRIMARY KEY,
+    doctor_id NUMBER NOT NULL REFERENCES doctordetails(id),
+    available_day  Varchar(20) NOT NULL,
+    start_time VARCHAR2(10),
+    end_time VARCHAR2(10)
+);
+
